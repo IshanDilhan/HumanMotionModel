@@ -1,0 +1,48 @@
+{
+  "model_info": {
+    "architecture": "LSTM",
+    "hidden_size": 64,
+    "num_layers": 2,
+    "total_parameters": 77897,
+    "input_size": 99,
+    "output_classes": 9,
+    "sequence_max_length": 29
+  },
+  "training_info": {
+    "total_epochs_trained": 50,
+    "best_epoch": 50,
+    "batch_size": 16,
+    "optimizer": "Adam",
+    "learning_rate_initial": 0.001,
+    "scheduler": "ReduceLROnPlateau"
+  },
+  "dataset_info": {
+    "total_sequences": 450,
+    "train_sequences": 360,
+    "test_sequences": 90,
+    "train_test_split": "80/20",
+    "num_classes": 9,
+    "motion_labels": [
+      "Stationary",
+      "Approaching",
+      "Backing Away",
+      "Fast Across",
+      "Slow Approach",
+      "Fast Toward",
+      "Approach + Stop",
+      "Minimal",
+      "Across"
+    ]
+  },
+  "overall_metrics": {
+    "accuracy": 1.0,
+    "accuracy_percent": 100.0,
+    "precision": 1.0,
+    "precision_percent": 100.0,
+    "recall": 1.0,
+    "recall_percent": 100.0,
+    "f1_score": 1.0,
+    "f1_score_percent": 100.0
+  },
+  "per_class_metrics": {}
+}

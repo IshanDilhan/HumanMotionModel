@@ -1,0 +1,22 @@
+{
+  "model_type": "LSTM",
+  "input_size": 99,
+  "hidden_size": 64,
+  "num_layers": 2,
+  "num_classes": 9,
+  "max_sequence_length": 29,
+  "motion_labels": [
+    "Stationary",
+    "Approaching",
+    "Backing Away",
+    "Fast Across",
+    "Slow Approach",
+    "Fast Toward",
+    "Approach + Stop",
+    "Minimal",
+    "Across"
+  ],
+  "accuracy": 100.0,
+  "f1_score": 100.0,
+  "best_epoch": 50
+}

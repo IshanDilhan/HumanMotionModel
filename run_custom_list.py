@@ -6,56 +6,51 @@ import sys
 # MANUALLY ADD YOUR VIDEOS HERE
 # Just put the filename (e.g., "5.mp4") if it's in testVideo
 # ==========================================================
-VIDEOS_TO_CHECK = [
-    "20.mp4",
-    "21.mp4",
-    "22.mp4",
+CUSTOM_VIDEO_LIST = [
+    "1.mp4",
+    "2.mp4",
+    "3.mp4"
 ]
-# ==========================================================
 
 def run_custom():
     video_dir = "testVideo"
     script_name = "action_recognizer.py"
-
-    print(f"--- Custom Video Batch Runner ---")
-    print(f"Using Python: {sys.executable}")
-
+    
     if not os.path.exists(video_dir):
         print(f"Error: Directory '{video_dir}' not found.")
         return
 
-    # Filter to ensure we only try existing files
+    # Filter out empty or missing videos
     valid_videos = []
-    for v in VIDEOS_TO_CHECK:
-        full_path = os.path.join(video_dir, v)
-        if os.path.exists(full_path):
-            valid_videos.append(full_path)
+    for item in CUSTOM_VIDEO_LIST:
+        path = os.path.join(video_dir, item)
+        if os.path.isfile(path):
+            valid_videos.append(path)
         else:
-            print(f"[WARNING] File not found: {full_path}")
+            print(f"Warning: Video file '{item}' not found in '{video_dir}'. Skipping.")
 
     if not valid_videos:
-        print("No valid videos to process.")
+        print("No valid videos to process in CUSTOM_VIDEO_LIST.")
         return
 
-    print(f"Starting processing of {len(valid_videos)} videos...\n")
+    print(f"Starting custom run of {len(valid_videos)} videos...")
 
     for video_path in valid_videos:
-        print(f">>> Processing: {video_path}")
-
-        # Use the same command format that worked in run_single_video.py
+        print(f"\n========================================")
+        print(f"Running LSTM model on: {os.path.basename(video_path)}")
+        print(f"========================================")
+        
         command = [sys.executable, script_name, "--video", video_path]
-
+        
         try:
-            # Shell=False is safer, and we use the current sys.executable
             subprocess.run(command, check=True)
         except subprocess.CalledProcessError as e:
-            print(f"Error: Script failed for {video_path}")
+            print(f"Process exited with error on {os.path.basename(video_path)}: {e}")
         except KeyboardInterrupt:
-            print("\nStopped by user.")
+            print("\nExecution stopped by user.")
             break
 
-    print("\nAll tasks finished.")
+    print("\nCustom run completed.")
 
 if __name__ == "__main__":
     run_custom()
-

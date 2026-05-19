@@ -1,0 +1,13 @@
+{
+  "motion_labels": [
+    "Stationary",
+    "Approaching",
+    "Backing Away",
+    "Fast Across",
+    "Slow Approach",
+    "Fast Toward",
+    "Approach + Stop",
+    "Minimal",
+    "Across"
+  ]
+}

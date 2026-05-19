@@ -6,52 +6,44 @@ A robust computer vision system that combines skeletal tracking, deep learning, 
 
 ## 📋 Project Overview
 
-### **Model Name**
+### **Model Architecture & Engines**
 A Hybrid Multi-Stage Recognition System:
-- **MediaPipe Pose Engine:** For high-speed skeletal landmark detection.
-- **ResNet50 (Residual Network):** Fine-tuned on the **Stanford40 Actions** dataset for complex action classification.
-- **Geometric Motion Analyser:** Custom-built velocity-based tracker for directional movement.
-- **Rule-based Pose Classifier:** Geometric analysis for basic postures (Standing, Sitting, etc.).
+- **MediaPipe Pose Engine:** High-speed skeletal landmark detection (33 body keypoints).
+- **PyTorch LSTM Sequence Model:** 2-layer Recurrent Neural Network trained on keypoint velocities to classify 9 Human-Robot Interaction (HRI) motions with high temporal consistency and accuracy.
+- **ResNet50 (Residual Network):** Fine-tuned on the **Stanford40 Actions** dataset for static action context classification (optional).
+- **Rule-based Pose Classifier:** Geometric analysis for basic postures (Standing, Sitting, Lying, Crouching).
 
 ### **Objective**
-To develop a comprehensive human monitoring system capable of understanding not just *what* a person is doing (e.g., "Reading"), but also *how* they are moving (e.g., "Approaching") and their *physical posture* (e.g., "Sitting").
+To develop a comprehensive human-robot interaction (HRI) monitoring system capable of understanding:
+1. **Pose:** Physical posture (e.g., "Sitting", "Standing").
+2. **Motion:** Directional trajectory and velocity in 3D relative to the camera (e.g., "Approaching", "Backing Away", "Fast Toward").
+3. **Action:** Static context classification (e.g., "Reading", "Phoning").
 
 ### **Dataset**
-- **Stanford 40 Actions:** Consists of 9,532 images across 40 diverse categories (e.g., applauding, fishing, phoning, riding a bike).
-- **MediaPipe Internal Data:** Used for the underlying 33-keypoint pose estimation.
+- **Stanford 40 Actions:** 9,532 images across 40 diverse categories.
+- **Synthetic HRI Motion Dataset:** A custom-generated dataset of 450 keypoint sequences representing 9 different motion trajectories (50 sequences per class) with Gaussian noise, trajectory scaling, and realistic frame rates, specifically tailored for HRI scenarios.
 
 ### **Techniques Used**
-- **Transfer Learning:** Leveraging ImageNet-pretrained weights for ResNet50 and fine-tuning on Stanford40.
-- **Pose Estimation:** Using MediaPipe's Blazepose architecture for real-time keypoint extraction.
-- **Velocity Tracking:** Using a sliding window of frames to calculate Center-of-Mass (CoM) movement in 3D space.
-- **Normalization:** Image transforms (Resize, Crop, Normalization) to match model input requirements.
-
-### **Extracted Features**
-- **Landmarks:** 33 body keypoints (x, y, z coordinates).
-- **Motion Vectors:** Velocity (vx, vy, vz) derived from shoulder and hip coordinates.
-- **Geometric Ratios:** Torso-to-body and leg-to-body ratios to distinguish Sitting/Standing/Lying.
-- **Visual Encodings:** High-dimensional feature maps extracted by the ResNet backbone.
-
-### **Output**
-- **Real-time Annotated Video:** Skeleton overlay with live tracking.
-- **Pose Label:** Standing, Sitting, Lying, Crouching.
-- **Motion Label:** Stationary, Approaching, Backing Away, Fast Across, Slow Approach, etc.
-- **Action Label:** 40 classes (e.g., Phoning, Texting, Drinking).
-- **Performance Data:** Real-time FPS (Frames Per Second).
+- **Skeletal Sequence Modeling:** LSTM network processing sequential frame data to learn temporal relationships in movement.
+- **Feature Scaling:** Velocities scaled by 100.0 to match the neural network input range and resolve vanishing gradient problems.
+- **Data Augmentation:** Gaussian noise injections, translation scaling, and dynamic speed variations applied to synthetic coordinates.
+- **Transfer Learning:** ImageNet-pretrained ResNet50 fine-tuned on Stanford40.
+- **Temporal Smoothing:** Sliding window keypoint buffer for live, flicker-free inference.
 
 ---
 
 ## 📈 Results & Performance
 
 ### **Accuracies**
+- **PyTorch LSTM Motion Model:** **100.0%** classification accuracy, precision, recall, and F1-score on the evaluation dataset.
 - **ResNet50 Action Model:** ~**88.5%** accuracy on the Stanford40 test set.
-- **Pose Tracking:** High precision (MediaPipe standard) even in varying lighting conditions.
+- **Pose Tracking:** High-precision skeletal tracking in real-time.
 
 ### **Training Process**
-1. **Backbone Selection:** ResNet50 was chosen for its excellent balance between depth (50 layers) and inference speed.
-2. **Pre-training:** The model starts with weights trained on **ImageNet**, allowing it to already understand basic shapes, edges, and textures.
-3. **Fine-tuning:** The final layers were replaced and trained specifically on the 40 Stanford Action classes to map visual features to specific human behaviors.
-4. **Optimization:** Standard PyTorch transforms (224x224 resize, Mean/Std normalization) ensure the model receives data in the exact format it was trained on.
+1. **Velocity Extraction:** Frame-to-frame coordinate differences computed for all 33 pose landmarks.
+2. **Feature Normalization:** Velocities scaled by `100.0` to bring inputs to a standard variance (0.5 to 1.5), optimizing gradient flow.
+3. **Sequence Alignment:** Padding and truncation applied to align all sequences to exactly 29 frames.
+4. **LSTM Training:** Trained for 50 epochs using Cross-Entropy Loss, Adam optimizer, and `ReduceLROnPlateau` learning rate scheduling, saving the best checkpoint based on validation loss.
 
 ---
 
@@ -76,28 +68,56 @@ To develop a comprehensive human monitoring system capable of understanding not 
 
 ## 🎮 Usage Guide
 
-### 1. Process All Videos in a Folder
-Put your `.mp4` files in `testVideo/` and run:
+To run the system, make sure to execute commands using the virtual environment Python interpreter (`.\env\Scripts\python.exe`):
+
+### 1. Run LSTM Inference on a Single Video
+List and select from available test videos:
 ```powershell
-.\env\Scripts\python.exe run_all_and_save.py
+.\env\Scripts\python.exe run_single_video_lstm.py
+```
+Or specify path directly:
+```powershell
+.\env\Scripts\python.exe action_recognizer_lstm.py --video testVideo/1.mp4
 ```
 
-### 2. Live Webcam Recognition
+### 2. Save Visual Output Video (Dashboard Overlay)
+Run the model on a video and write the annotated dashboard to a file:
 ```powershell
-.\env\Scripts\python.exe action_recognizer.py --webcam --action-model
+.\env\Scripts\python.exe run_and_save_video_lstm.py
+```
+Or run directly:
+```powershell
+.\env\Scripts\python.exe action_recognizer_lstm.py --video testVideo/1.mp4 --save output/output_lstm_1.avi
 ```
 
-### 3. Save Output for a Single Video
+### 3. Run LSTM Inference on Live Webcam
 ```powershell
-.\env\Scripts\python.exe action_recognizer.py --video path/to/video.mp4 --save output.avi --action-model
+.\env\Scripts\python.exe action_recognizer_lstm.py --webcam
+```
+
+### 4. Batch Process All Videos in a Folder
+Process all videos in `testVideo/` and save to the `output/` folder:
+```powershell
+.\env\Scripts\python.exe run_all_and_save_lstm.py
+```
+
+### 5. Run Original Heuristic Recognizer
+To run the original velocity-heuristic version:
+```powershell
+.\env\Scripts\python.exe run_single_video.py
 ```
 
 ---
 
 ## 📁 Project Structure
-- `action_recognizer.py`: Core logic and model implementations.
-- `run_all_and_save.py`: Batch processing script for `testVideo/`.
-- `testVideo/`: Input directory for video files.
+- `action_recognizer_lstm.py`: Main real-time inference pipeline using the LSTM neural network and visual dashboard overlay.
+- `action_recognizer.py`: Original heuristic-based motion recognizer.
+- `model_train/`:
+  - `1_prepare_dataset.ipynb`: Jupyter notebook generating the synthetic trajectory dataset.
+  - `2_train_and_evaluate.ipynb`: Jupyter notebook defining the LSTM model, training, and generating validation curves.
+  - `models/`: Contains model weights (`motion_lstm_best.pth`), parameters (`model_config.json`), evaluation report (`evaluation_report.json`), and validation curves.
+- `run_single_video_lstm.py` / `run_and_save_video_lstm.py` / `run_all_and_save_lstm.py`: Convenient runners for the LSTM model.
+- `testVideo/`: Input directory for test video files.
 - `output/`: Directory for annotated results.
 - `env/`: Virtual environment with dependencies.
 

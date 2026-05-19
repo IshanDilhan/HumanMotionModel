@@ -12,7 +12,7 @@ def run_and_save():
         os.makedirs(output_dir)
         print(f"Created output directory: {output_dir}")
 
-    print("--- Video Action Recognizer with Save ---")
+    print("--- Video Action Recognizer with Save (LSTM Model) ---")
     print(f"Default video folder: {video_dir}")
     print(f"Default output folder: {output_dir}")
     
@@ -70,7 +70,7 @@ def run_and_save():
     # 3. Get Output Filename
     base_name = os.path.basename(target_video)
     name_only = os.path.splitext(base_name)[0]
-    default_output = f"output_{name_only}.avi"
+    default_output = f"output_lstm_{name_only}.avi"
     
     print(f"\nTarget video: {target_video}")
     output_choice = input(f"Enter output filename (default: {default_output}): ").strip()
@@ -85,15 +85,10 @@ def run_and_save():
         output_path = output_choice
 
     # 4. Execute
-    print(f"\n>>> Running recognizer on: {target_video}")
+    print(f"\n>>> Running LSTM recognizer on: {target_video}")
     print(f">>> Saving output to: {output_path}")
     
     command = [sys.executable, script_name, "--video", target_video, "--save", output_path]
-    
-    # Optional: ask if they want to run the action model (slower)
-    run_model = input("Run action model (ResNet50)? (y/N): ").strip().lower()
-    if run_model == 'y':
-        command.append("--action-model")
 
     try:
         subprocess.run(command, check=True)

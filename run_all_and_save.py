@@ -30,12 +30,8 @@ def run_all_and_save():
     except ValueError:
         videos.sort()
 
-    print(f"--- Batch Video Action Recognizer ---")
+    print(f"--- Batch Video Action Recognizer (LSTM Model) ---")
     print(f"Found {len(videos)} videos in '{video_dir}'.")
-    
-    # Optional: ask if they want to run the action model (slower for batch)
-    run_model = input("Run action model (ResNet50) for all? (y/N): ").strip().lower()
-    
     print("\nStarting batch processing...")
 
     for video in videos:
@@ -48,8 +44,6 @@ def run_all_and_save():
         
         # Construct the command
         command = [sys.executable, script_name, "--video", video_path, "--save", output_path]
-        if run_model == 'y':
-            command.append("--action-model")
         
         try:
             # Run the script and wait for it to finish

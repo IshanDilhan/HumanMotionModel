@@ -43,7 +43,7 @@ def run_all_and_save():
         print(f"    Saving to: {output_path}")
         
         # Construct the command
-        command = [sys.executable, script_name, "--video", video_path, "--save", output_path]
+        command = [sys.executable, script_name, "--video", video_path, "--save", output_path] + sys.argv[1:]
         
         try:
             # Run the script and wait for it to finish

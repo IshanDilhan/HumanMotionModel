@@ -63,7 +63,7 @@ def select_and_run():
 
     # 3. Execute
     print(f"\n>>> Running LSTM recognizer on: {target_video}")
-    command = [sys.executable, script_name, "--video", target_video]
+    command = [sys.executable, script_name, "--video", target_video] + sys.argv[1:]
 
     try:
         subprocess.run(command, check=True)

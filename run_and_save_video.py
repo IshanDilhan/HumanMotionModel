@@ -88,7 +88,7 @@ def run_and_save():
     print(f"\n>>> Running LSTM recognizer on: {target_video}")
     print(f">>> Saving output to: {output_path}")
     
-    command = [sys.executable, script_name, "--video", target_video, "--save", output_path]
+    command = [sys.executable, script_name, "--video", target_video, "--save", output_path] + sys.argv[1:]
 
     try:
         subprocess.run(command, check=True)

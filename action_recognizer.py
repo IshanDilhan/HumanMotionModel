@@ -32,35 +32,35 @@ import torch.nn as nn
 # MOTION LABELS
 # ─────────────────────────────────────────────────────────────────────────────
 MOTION_LABELS = [
-    "Stationary",
-    "Approaching",
-    "Backing Away",
-    "Fast Across",
-    "Slow Approach",
-    "Fast Toward",
-    "Approach + Stop",
-    "Minimal",
-    "Across",
+    "Sitting Still",
+    "Standing Still",
+    "Walk Toward",
+    "Step/Walk Back",
+    "Walk Across",
+    "Run Backward",
+    "Run (Fast Movement)",
+    "Leaning Forward",
+    "Frozen/Rigid Stand",
 ]
 
 # Colour per label (BGR)
 LABEL_COLORS = {
-    "Stationary":     (160, 160, 160),  # Grey
-    "Approaching":    (0,   210, 255),  # Yellow-orange
-    "Backing Away":   (255, 120,   0),  # Blue
-    "Fast Across":    (0,   255, 100),  # Green
-    "Slow Approach":  (50,  220, 255),  # Light yellow
-    "Fast Toward":    (0,    80, 255),  # Orange-red
-    "Approach + Stop":(220, 255,   0),  # Lime
-    "Minimal":        (130, 130, 130),  # Dark Grey
-    "Across":         (0,   255, 200),  # Turquoise
+    "Sitting Still":       (160, 160, 160),  # Grey
+    "Standing Still":      (200, 200, 200),  # Light Grey
+    "Walk Toward":         (0,   210, 255),  # Yellow-orange
+    "Step/Walk Back":      (255, 120,   0),  # Blue
+    "Walk Across":         (0,   255, 100),  # Green
+    "Run Backward":        (0,    80, 255),  # Orange-red
+    "Run (Fast Movement)": (0,   255, 200),  # Turquoise
+    "Leaning Forward":     (220, 255,   0),  # Lime
+    "Frozen/Rigid Stand":  (50,   50, 150),  # Dark Red/Blue
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
 # LSTM MODEL DEFINITION
 # ─────────────────────────────────────────────────────────────────────────────
 class MotionLSTM(nn.Module):
-    def __init__(self, input_size=99, hidden_size=64, num_layers=2, num_classes=9, dropout=0.3):
+    def __init__(self, input_size=99, hidden_size=128, num_layers=3, num_classes=9, dropout=0.4):
         super(MotionLSTM, self).__init__()
         self.lstm = nn.LSTM(
             input_size=input_size,
@@ -70,7 +70,10 @@ class MotionLSTM(nn.Module):
             dropout=dropout if num_layers > 1 else 0
         )
         self.fc = nn.Sequential(
-            nn.Linear(hidden_size, 32),
+            nn.Linear(hidden_size, 64),
+            nn.ReLU(),
+            nn.Dropout(dropout),
+            nn.Linear(64, 32),
             nn.ReLU(),
             nn.Dropout(dropout),
             nn.Linear(32, num_classes)
@@ -184,13 +187,13 @@ def draw_dashboard(frame, pose_label, motion_label, confidence, probabilities, f
 # ─────────────────────────────────────────────────────────────────────────────
 # MAIN EXECUTION ROUTINE
 # ─────────────────────────────────────────────────────────────────────────────
-def run(source, model_path, save_path=None):
+def run(source, model_path, save_path=None, no_show=False):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"[INFO] Using device: {device}")
     
     # Load LSTM Model
     print(f"[INFO] Loading LSTM model from: {model_path}")
-    model = MotionLSTM(input_size=99, hidden_size=64, num_layers=2, num_classes=9, dropout=0.3)
+    model = MotionLSTM(input_size=99, hidden_size=128, num_layers=3, num_classes=9, dropout=0.4)
     try:
         model.load_state_dict(torch.load(model_path, map_location=device))
         model.to(device)
@@ -263,7 +266,7 @@ def run(source, model_path, save_path=None):
                 keypoints_queue.clear()
                 
             # Run model inference on sliding window
-            motion_label = "Stationary"
+            motion_label = MOTION_LABELS[0]
             confidence = 1.0
             probabilities = np.zeros(9)
             probabilities[0] = 1.0
@@ -299,7 +302,7 @@ def run(source, model_path, save_path=None):
                 # If no landmarks, default values
                 probabilities = np.zeros(9)
                 probabilities[0] = 1.0
-                motion_label = "Stationary"
+                motion_label = MOTION_LABELS[0]
                 confidence = 1.0
                 
             # Measure FPS
@@ -317,9 +320,10 @@ def run(source, model_path, save_path=None):
             if writer:
                 writer.write(canvas)
                 
-            cv2.imshow("Human Motion Recognizer LSTM", canvas)
-            if cv2.waitKey(1) & 0xFF == ord("q"):
-                break
+            if not no_show:
+                cv2.imshow("Human Motion Recognizer LSTM", canvas)
+                if cv2.waitKey(1) & 0xFF == ord("q"):
+                    break
                 
     cap.release()
     if writer:
@@ -341,9 +345,11 @@ if __name__ == "__main__":
     
     parser.add_argument("--model-path", type=str, metavar="PATH",
                         default=os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                             "model_train", "models", "motion_lstm_best.pth"),
+                                             "models", "motion_lstm_v2_best.pth"),
                         help="Path to trained LSTM model weights")
     parser.add_argument("--save", type=str, metavar="OUT", help="Save output video path (.avi)")
+    parser.add_argument("--no-show", action="store_true",
+                        help="Do not display OpenCV window (useful for headless/batch execution)")
     
     args = parser.parse_args()
     
@@ -354,4 +360,4 @@ if __name__ == "__main__":
     else:
         source = args.video
         
-    run(source, args.model_path, save_path=args.save)
+    run(source, args.model_path, save_path=args.save, no_show=args.no_show)

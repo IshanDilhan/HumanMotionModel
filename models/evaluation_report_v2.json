@@ -1,0 +1,145 @@
+{
+  "accuracy": 0.8889,
+  "precision": 0.8333,
+  "recall": 0.8889,
+  "f1_score": 0.8519,
+  "confusion_matrix": [
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      40
+    ],
+    [
+      0,
+      40,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      40,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      40,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      40,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      40,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      40,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      40,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      40
+    ]
+  ],
+  "per_class": {
+    "Sitting Still": {
+      "accuracy": 0.0,
+      "support": 40
+    },
+    "Standing Still": {
+      "accuracy": 1.0,
+      "support": 40
+    },
+    "Walk Toward": {
+      "accuracy": 1.0,
+      "support": 40
+    },
+    "Step/Walk Back": {
+      "accuracy": 1.0,
+      "support": 40
+    },
+    "Walk Across": {
+      "accuracy": 1.0,
+      "support": 40
+    },
+    "Run Backward": {
+      "accuracy": 1.0,
+      "support": 40
+    },
+    "Run (Fast Movement)": {
+      "accuracy": 1.0,
+      "support": 40
+    },
+    "Leaning Forward": {
+      "accuracy": 1.0,
+      "support": 40
+    },
+    "Frozen/Rigid Stand": {
+      "accuracy": 1.0,
+      "support": 40
+    }
+  }
+}

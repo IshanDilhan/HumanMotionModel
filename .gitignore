@@ -57,3 +57,15 @@ output/*.mp4
 # OS
 .DS_Store
 Thumbs.db
+
+# Scenario table extracts & PDFs
+HRI_Dataset_Table_extracted.txt
+HRI_Dataset_Table.pdf
+doc/HRI_Dataset_Table_extracted.txt
+doc/HRI_Dataset_Table.pdf
+notes.txt
+implementation_plan.txt
+
+# Dataset directories
+extracted_keypoints_v2/
+

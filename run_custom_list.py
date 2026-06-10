@@ -40,7 +40,7 @@ def run_custom():
         print(f"Running LSTM model on: {os.path.basename(video_path)}")
         print(f"========================================")
         
-        command = [sys.executable, script_name, "--video", video_path]
+        command = [sys.executable, script_name, "--video", video_path] + sys.argv[1:]
         
         try:
             subprocess.run(command, check=True)

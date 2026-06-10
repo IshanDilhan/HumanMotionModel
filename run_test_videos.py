@@ -32,7 +32,7 @@ def run_batch():
         print(f"Running LSTM model on: {video}")
         print(f"========================================")
         
-        command = [sys.executable, script_name, "--video", video_path]
+        command = [sys.executable, script_name, "--video", video_path] + sys.argv[1:]
         
         try:
             # Execute script and block until the user quits/completes the video

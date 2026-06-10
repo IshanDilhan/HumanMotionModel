@@ -140,10 +140,10 @@ If you want to process and save videos in the background without popping up the 
 .\env\Scripts\python.exe run_all_and_save.py --no-show
 ```
 
-### **5. Run Custom Video Playlists**
-Process a manual list of video names defined inside `run_custom_list.py`:
+### **5. Run Multiple Videos Sequentially (Stream Feed)**
+Stream and visualize all test videos in `testVideo/` one after another:
 ```powershell
-.\env\Scripts\python.exe run_custom_list.py
+.\env\Scripts\python.exe run_test_videos.py
 ```
 
 ---
@@ -158,14 +158,17 @@ motion_final/
 ├── dataset_info_v2.json        # Dataset properties for the new v2 model
 ├── requirements.txt            # Main Python dependencies
 ├── README.md                   # Project documentation & Viva Q&A
-├── Motion Recognition...png    # Schematic/flow diagram of the pipeline
+├── run_all_and_save.py         # Batch runner script (Run all & Save)
+├── run_single_video.py         # Single video interactive runner script
+├── run_test_videos.py          # Sequential video runner script
 │
 ├── doc/                        # Project documentation & scenario tables (GIT-IGNORED)
 │   ├── HRI_Dataset_Table.pdf   # Scenario table PDF
 │   ├── HRI_Dataset_Table_ext...txt # Scenario table parsed text
 │   ├── notes.txt               # Step-by-step pipeline process & specs notes
 │   ├── implementation_plan.txt # Approved project implementation plan text
-│   └── scenarios_explanation.md # Detailed breakdown of 39 HRI intent scenarios
+│   ├── scenarios_explanation.md # Detailed breakdown of 39 HRI intent scenarios
+│   └── Motion Recognition...png  # Schematic/flow diagram of the pipeline
 │
 ├── model_train/                # Dataset & training tools
 │   ├── 1_prepare_dataset_v2.py # Synthetic dataset generator script

@@ -212,18 +212,28 @@ def run(source, model_path, save_path=None, no_show=False):
         print(f"[ERROR] Cannot open source: {source}")
         sys.exit(1)
         
+    # Auto-rotation metadata query (cv2.CAP_PROP_ORIENTATION_META or index 48)
+    orientation = cap.get(cv2.CAP_PROP_ORIENTATION_META) if hasattr(cv2, "CAP_PROP_ORIENTATION_META") else cap.get(48)
+    rotation_code = None
+    if orientation == 90:
+        rotation_code = cv2.ROTATE_90_CLOCKWISE
+    elif orientation == 180:
+        rotation_code = cv2.ROTATE_180
+    elif orientation == 270:
+        rotation_code = cv2.ROTATE_90_COUNTERCLOCKWISE
+
+    def resize_with_aspect_ratio(image, max_dim=960):
+        h, w = image.shape[:2]
+        if max(h, w) <= max_dim:
+            return image
+        scale = max_dim / float(max(h, w))
+        new_w = int(w * scale)
+        new_h = int(h * scale)
+        return cv2.resize(image, (new_w, new_h), interpolation=cv2.INTER_AREA)
+
     fps_cam = cap.get(cv2.CAP_PROP_FPS) or 30
     writer = None
     
-    if save_path:
-        fw = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        fh = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        sidebar_w = 320
-        # Canvas size is frame width + sidebar width
-        fourcc = cv2.VideoWriter_fourcc(*"XVID")
-        writer = cv2.VideoWriter(save_path, fourcc, fps_cam, (fw + sidebar_w, fh))
-        print(f"[INFO] Saving output to: {save_path}")
-        
     print("[INFO] Press 'Q' to quit.")
     
     # Keep sliding window queue of last 30 frames keypoints
@@ -243,6 +253,21 @@ def run(source, model_path, save_path=None, no_show=False):
             ret, frame = cap.read()
             if not ret:
                 break
+                
+            # Rotate if needed
+            if rotation_code is not None:
+                frame = cv2.rotate(frame, rotation_code)
+                
+            # Downscale for performance
+            frame = resize_with_aspect_ratio(frame, max_dim=960)
+            
+            # Lazy initialize VideoWriter after rotation & resizing
+            if save_path and writer is None:
+                fh, fw = frame.shape[:2]
+                sidebar_w = 320
+                fourcc = cv2.VideoWriter_fourcc(*"XVID")
+                writer = cv2.VideoWriter(save_path, fourcc, fps_cam, (fw + sidebar_w, fh))
+                print(f"[INFO] Saving output to: {save_path} with size: {fw + sidebar_w}x{fh}")
                 
             frame_idx += 1
             rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)

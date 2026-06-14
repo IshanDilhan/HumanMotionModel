@@ -1,76 +1,112 @@
+"""
+Interactive Single Video Runner — HRI Motion Recognizer
+=======================================================
+Lists all videos from testVideo/ and testVideo2/ in one menu.
+Phone/portrait videos are handled automatically — just pick and run.
+
+Usage:
+    python run_single_video.py
+"""
+
 import os
 import subprocess
 import sys
 
+VIDEO_EXTENSIONS = ('.mp4', '.avi', '.mov', '.mkv', '.mov', '.mp4', '.avi', '.mkv')
+SCRIPT_NAME = "action_recognizer.py"
+
+# All source folders — add more here if needed
+VIDEO_FOLDERS = ["testVideo", "testVideo2"]
+
+
+def collect_all_videos():
+    """Gather videos from all folders into a flat list with source labels."""
+    entries = []  # list of (display_label, filepath)
+    for folder in VIDEO_FOLDERS:
+        if not os.path.exists(folder):
+            continue
+        files = [f for f in os.listdir(folder) if f.lower().endswith(VIDEO_EXTENSIONS)]
+        try:
+            files.sort(key=lambda x: int(os.path.splitext(x)[0]))
+        except ValueError:
+            files.sort()
+        for f in files:
+            # Label shows source folder so user knows which is phone vs regular
+            label = f"[{folder}]  {f}"
+            entries.append((label, os.path.join(folder, f)))
+    return entries
+
+
 def select_and_run():
-    video_dir = "testVideo"
-    script_name = "action_recognizer.py"
-    
-    print("--- Single Video Action Recognizer (LSTM Model) ---")
-    print(f"Using Python: {sys.executable}")
-    print(f"Default video folder: {video_dir}\n")
-    
-    # 1. Get video list
-    if not os.path.exists(video_dir):
-        print(f"Error: Directory '{video_dir}' not found.")
+    print("=" * 60)
+    print("  HRI Motion Recognizer — Select a Video")
+    print("  Phone videos (.MOV) handled automatically")
+    print("=" * 60)
+    print(f"  Python: {sys.executable}\n")
+
+    entries = collect_all_videos()
+
+    if not entries:
+        print("No videos found in any of:", VIDEO_FOLDERS)
         return
 
-    video_extensions = ('.mp4', '.avi', '.mov', '.mkv')
-    videos = [f for f in os.listdir(video_dir) if f.lower().endswith(video_extensions)]
-    
-    if not videos:
-        print(f"No video files found in '{video_dir}'.")
-        return
+    # Display menu
+    print("Available videos:\n")
+    for i, (label, _) in enumerate(entries):
+        print(f"  [{i+1:>3}]  {label}")
+    print()
 
-    # Sort videos numerically if possible, otherwise alphabetically
+    # Selection
     try:
-        videos.sort(key=lambda x: int(os.path.splitext(x)[0]))
-    except ValueError:
-        videos.sort()
-
-    print("Available videos:")
-    for i, v in enumerate(videos):
-        print(f"[{i+1}] {v}")
-    
-    # 2. Select Video
-    try:
-        val = input("\nEnter video number or filename (e.g. 1 or 1.mp4): ").strip()
+        val = input("Enter number or full filename/path: ").strip()
         if not val:
             print("No input provided.")
             return
-            
+
         target_video = ""
+
         if val.isdigit():
             idx = int(val) - 1
-            if 0 <= idx < len(videos):
-                target_video = os.path.join(video_dir, videos[idx])
+            if 0 <= idx < len(entries):
+                target_video = entries[idx][1]
             else:
-                print("Invalid number.")
+                print(f"Invalid number. Enter 1–{len(entries)}.")
                 return
         else:
-            # Check if it's a filename in testVideo
-            potential_path = os.path.join(video_dir, val)
-            if os.path.isfile(potential_path):
-                target_video = potential_path
-            elif os.path.isfile(val):
+            # Try as a path directly
+            if os.path.isfile(val):
                 target_video = val
             else:
-                print(f"Could not find video: {val}")
-                return
-    except ValueError:
-        print("Invalid input.")
+                # Search all folders
+                for folder in VIDEO_FOLDERS:
+                    candidate = os.path.join(folder, val)
+                    if os.path.isfile(candidate):
+                        target_video = candidate
+                        break
+                if not target_video:
+                    print(f"Could not find: {val}")
+                    return
+
+    except (ValueError, KeyboardInterrupt):
+        print("\nCancelled.")
         return
 
-    # 3. Execute
-    print(f"\n>>> Running LSTM recognizer on: {target_video}")
-    command = [sys.executable, script_name, "--video", target_video] + sys.argv[1:]
+    # Ask to save?
+    print(f"\n>>> Running on: {target_video}")
+    save_val = input("Save output? Enter filename (e.g. output/result.avi) or press Enter to skip: ").strip()
+
+    cmd = [sys.executable, SCRIPT_NAME, "--video", target_video]
+    if save_val:
+        os.makedirs(os.path.dirname(save_val) if os.path.dirname(save_val) else ".", exist_ok=True)
+        cmd += ["--save", save_val]
 
     try:
-        subprocess.run(command, check=True)
+        subprocess.run(cmd, check=True)
     except subprocess.CalledProcessError as e:
         print(f"Error: {e}")
     except KeyboardInterrupt:
         print("\nStopped by user.")
+
 
 if __name__ == "__main__":
     select_and_run()

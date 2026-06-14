@@ -1,6 +1,6 @@
 # HRI Scenarios & Motion Intent Mapping
 
-This document provides a detailed explanation of the **39 HRI intent scenarios** across Classroom and Kitchen contexts and describes how the upgraded **9 human motion classes** fit into this multi-cue framework.
+This document provides a detailed explanation of the **39 HRI intent scenarios** across Classroom and Kitchen contexts and describes how the upgraded **8 human motion classes** fit into this multi-cue framework.
 
 ---
 
@@ -13,7 +13,7 @@ $$\text{Context} + \text{Emotion} + \text{Gesture} + \text{Motion} \longrightarr
 1. **Context (Environment)**: Where is the interaction happening? (e.g., *Classroom* vs. *Kitchen*).
 2. **Emotion (Affective State)**: How does the user feel? (e.g., *Happy*, *Sad*, *Angry*, *Surprised*, *Neutral*, *Fear*).
 3. **Gesture (Fine-grained Action)**: What are the hands/arms doing? (e.g., *Raise hand*, *Wave*, *Thumbs up/down*, *Beckoning*, *Pointing*).
-4. **Motion (Body Trajectory)**: How is the body moving in space relative to the robot? (e.g., *Walk Toward*, *Step Back*, *Sitting*, *Standing*, *Frozen*). **This module is responsible for detecting the Motion cue.**
+4. **Motion (Body Trajectory)**: How is the body moving in space relative to the robot? (e.g., *Walking*, *Walk Across*, *Sitting*, *Standing*, *Frozen*). **This module is responsible for detecting the Motion cue.**
 
 ---
 
@@ -28,17 +28,17 @@ In the Classroom, the robot functions as a teaching assistant. The student's mot
     *   *Intent*: Help Request (Ask a question)
     *   *Role of Motion*: Confirming the student is seated, quiet, and waiting to be addressed.
 *   **Scenario 2: Student Greeting**
-    *   *Cues*: Classroom + Happy Emotion + Wave (Gesture) + **Walk Toward (Motion)**
+    *   *Cues*: Classroom + Happy Emotion + Wave (Gesture) + **Walking (Motion)**
     *   *Intent*: Social Interaction (Greeting)
-    *   *Role of Motion*: Approach velocity triggers the robot's greeting protocol.
+    *   *Role of Motion*: Approach translation triggers the robot's greeting protocol.
 *   **Scenario 4: Student Working**
     *   *Cues*: Classroom + Neutral Emotion + Writing (Gesture) + **Leaning Forward (Motion)**
     *   *Intent*: Academic engagement (Working on task)
     *   *Role of Motion*: Detecting the upper body leaning down/forward toward a desk.
 *   **Scenario 6: Startled / Panic Retreat**
-    *   *Cues*: Classroom + Fear/Surprise Emotion + Hands Up (Gesture) + **Step/Walk Back (Motion)**
+    *   *Cues*: Classroom + Fear/Surprise Emotion + Hands Up (Gesture) + **Walking (Motion)**
     *   *Intent*: Safety/Defensive (Retreating from danger)
-    *   *Role of Motion*: Fast backward displacement triggers an safety shutdown or emergency alert on the robot.
+    *   *Role of Motion*: Backward displacement triggers a safety shutdown or emergency alert on the robot.
 *   **Scenario 8: Passing By**
     *   *Cues*: Classroom + Neutral Emotion + No Gesture + **Walk Across (Motion)**
     *   *Intent*: Passively transitioning (Ignoring robot)
@@ -48,7 +48,7 @@ In the Classroom, the robot functions as a teaching assistant. The student's mot
     *   *Intent*: Physical state check (Tiredness/Sickness)
     *   *Role of Motion*: Long duration of zero velocity with a seated posture.
 *   **Scenario 19: Leaving Class (Active Exit)**
-    *   *Cues*: Classroom + Neutral Emotion + Wave (Gesture) + **Walk Toward/Across (Motion)**
+    *   *Cues*: Classroom + Neutral Emotion + Wave (Gesture) + **Walk Across/Walking (Motion)**
     *   *Intent*: Exit Classroom (Leaving)
 
 ---
@@ -64,9 +64,9 @@ In the Kitchen, the robot acts as a cooking assistant. Motions are crucial for s
     *   *Intent*: Active task execution (Cooking)
     *   *Role of Motion*: Person is stationary at a counter; fine hand motions are active.
 *   **Scenario 23: Hot Item Danger / Defensive Step**
-    *   *Cues*: Kitchen + Surprised Emotion + Hands pulled back (Gesture) + **Step/Walk Back (Motion)**
+    *   *Cues*: Kitchen + Surprised Emotion + Hands pulled back (Gesture) + **Walking (Motion)**
     *   *Intent*: Safety warning (Stepping back from heat/splatter)
-    *   *Role of Motion*: Immediate backward movement triggers the robot to offer oven mitts or shut off the stove.
+    *   *Role of Motion*: Immediate backward displacement triggers the robot to offer oven mitts or shut off the stove.
 *   **Scenario 30: Running Hazard**
     *   *Cues*: Kitchen + Playful/Anxious Emotion + No Gesture + **Run (Fast Movement) (Motion)**
     *   *Intent*: Safety Alert (Running in kitchen)
@@ -76,7 +76,7 @@ In the Kitchen, the robot acts as a cooking assistant. Motions are crucial for s
     *   *Intent*: Stress/Freeze Response
     *   *Role of Motion*: Extremely low coordinate variance (rigid freeze) compared to natural standing sway, indicating high tension.
 *   **Scenario 38: Cooperating (Handing over tool)**
-    *   *Cues*: Kitchen + Happy/Neutral Emotion + Extend Hand (Gesture) + **Walk Toward (Motion)**
+    *   *Cues*: Kitchen + Happy/Neutral Emotion + Extend Hand (Gesture) + **Walking (Motion)**
     *   *Intent*: Object Handover
     *   *Role of Motion*: Approach velocity coordinates tool exchange range.
 
@@ -84,19 +84,18 @@ In the Kitchen, the robot acts as a cooking assistant. Motions are crucial for s
 
 ## 📊 Motion Class Mapping Matrix
 
-This matrix maps our **9 motion classes** to the target HRI Intent scenarios:
+This matrix maps our **8 motion classes** to the target HRI Intent scenarios:
 
 | Class ID | Motion Class | Typical Posture | Associated Intent Scenarios | Robot Action |
 | :---: | :--- | :---: | :--- | :--- |
 | **0** | **Sitting Still** | Sitting | Classroom Help (#1), Writing (#4), Sleeping (#13), Seated Chat (#14) | Address student, lower speaking volume |
 | **1** | **Standing Still** | Standing | Kitchen Chopping (#21), Washing (#22), Waiting for tool (#35) | Standby, observe hands, hold tray |
-| **2** | **Walk Toward** | Standing | Greeting (#2), Approaching table (#16), Object handover (#38) | Face user, initiate greeting/handover |
-| **3** | **Step/Walk Back** | Standing | Startled retreat (#6), Kitchen hazard recoil (#23) | Clear workspace, sound alarm if close to danger |
-| **4** | **Walk Across** | Standing | Walking past (#8), Transitioning (#17), Crossing room (#25) | Maintain path, yield right of way |
-| **5** | **Run Backward** | Standing | Sudden danger panic (#19) | Stop all motion, safety shutdown |
-| **6** | **Run (Fast Movement)** | Standing | Run in kitchen hazard (#30) | Issue safety voice prompt ("Please walk") |
-| **7** | **Leaning Forward** | Standing/Sitting | Working/Inspecting (#11), Leaning on counter (#28) | Present details closely, tilt robot screen |
-| **8** | **Frozen/Rigid Stand** | Standing | Aggressive threat freeze (#34), Anxious hesitation (#36) | Back away slowly, adopt friendly posture |
+| **2** | **Walking** | Standing | Greeting (#2), Approaching table (#16), recoil (#23), handover (#38) | Face user, initiate greeting/handover/alarm |
+| **3** | **Walk Across** | Standing | Walking past (#8), Transitioning (#17), Crossing room (#25) | Maintain path, yield right of way |
+| **4** | **Run Backward** | Standing | Sudden danger panic (#19) | Stop all motion, safety shutdown |
+| **5** | **Run (Fast Movement)** | Standing | Run in kitchen hazard (#30) | Issue safety voice prompt ("Please walk") |
+| **6** | **Leaning Forward** | Standing/Sitting | Working/Inspecting (#11), Leaning on counter (#28) | Present details closely, tilt robot screen |
+| **7** | **Frozen/Rigid Stand** | Standing | Aggressive threat freeze (#34), Anxious hesitation (#36) | Back away slowly, adopt friendly posture |
 
 ---
 
@@ -107,14 +106,14 @@ During live deployment, our module outputs predictions at **30 FPS**:
 ```
 [Camera Frame] ──> [MediaPipe Pose] 
                        │
-                       ├──> [Rule-based Posture Classifier] ──> Posture: "Sitting"
+                       ├──> [Rule-based Posture Classifier] ──> Posture: "Standing"
                        │
-                       └──> [3-Layer LSTM Network]         ──> Motion:  "Walk Toward" (94%)
+                       └──> [Torso Translation Engine]      ──> Motion:  "Walking" (80%)
 ```
 
 These values are written directly to the shared pipeline database or ROS topics:
-*   `active_pose = "Sitting"`
-*   `active_motion = "Walk Toward"`
-*   `motion_confidence = 0.94`
+*   `active_pose = "Standing"`
+*   `active_motion = "Walking"`
+*   `motion_confidence = 0.80`
 
 A separate **Intent Fusion Model** (such as a multi-modal Transformer or Decision Tree) reads these motion values alongside the Context (e.g., Classroom), Emotion (e.g., Happy), and Gesture (e.g., Wave) to output the final Intention prediction: **Social Greeting (Say Hello)**.

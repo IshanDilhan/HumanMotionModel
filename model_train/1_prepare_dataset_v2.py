@@ -217,20 +217,37 @@ def apply_augmentations(template, offset=True, scale=True):
 # ──────────────────────────────────────────────────────────────────────
 
 def generate_sitting_still(n=SAMPLES_PER_CLASS):
-    """0: Sitting Still - Seated person with micro-jitter."""
+    """0: Sitting Still - Seated person with distinct micro-movements (breathing, fidgeting)."""
     sequences = []
     for _ in range(n):
         base = apply_augmentations(SITTING_POSE)
-        noise_level = np.random.uniform(0.001, 0.003)
-        seq = np.tile(base, (FRAMES_PER_SEQUENCE, 1, 1))
-        seq = add_noise(seq, noise_level=noise_level)
-        # Tiny breathing oscillation on shoulders
+        # Higher noise than frozen stand to create distinguishable velocity signal
+        noise_level = np.random.uniform(0.003, 0.007)
+        # Random oscillation frequencies for variation between samples
+        breath_freq = np.random.uniform(1.5, 3.0)
+        fidget_freq = np.random.uniform(0.8, 2.5)
+        head_nod_amp = np.random.uniform(0.004, 0.010)
+        wrist_fidget_amp = np.random.uniform(0.010, 0.022)
+        breath_amp = np.random.uniform(0.006, 0.014)
+        seq = []
         for f in range(FRAMES_PER_SEQUENCE):
             t = f / FRAMES_PER_SEQUENCE
-            breath = np.sin(t * 2 * np.pi) * 0.003
-            seq[f, 11, 1] += breath  # Left shoulder
-            seq[f, 12, 1] += breath  # Right shoulder
-        sequences.append(seq)
+            kp = base.copy()
+            # Breathing: shoulders rise and fall
+            breath = np.sin(t * breath_freq * 2 * np.pi) * breath_amp
+            kp[11, 1] += breath   # Left shoulder
+            kp[12, 1] += breath   # Right shoulder
+            # Head nodding (reading/looking at desk)
+            kp[0, 1] += np.sin(t * fidget_freq * np.pi) * head_nod_amp
+            kp[0, 2] += np.cos(t * fidget_freq * np.pi) * head_nod_amp * 0.5
+            # Wrist fidgeting (typing, writing on lap)
+            kp[15, 0] += np.sin(t * fidget_freq * 2 * np.pi) * wrist_fidget_amp
+            kp[15, 1] += np.cos(t * fidget_freq * 2 * np.pi) * wrist_fidget_amp * 0.5
+            kp[16, 0] -= np.sin(t * fidget_freq * 2 * np.pi) * wrist_fidget_amp
+            kp[16, 1] += np.cos(t * fidget_freq * 2 * np.pi) * wrist_fidget_amp * 0.5
+            kp = add_noise(kp, noise_level=noise_level)
+            seq.append(kp)
+        sequences.append(np.array(seq))
     return sequences
 
 
